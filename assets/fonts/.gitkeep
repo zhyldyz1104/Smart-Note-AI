@@ -1,0 +1,2 @@
+# Place Poppins-Bold.ttf, Poppins-SemiBold.ttf, Inter-Regular.ttf, Inter-Medium.ttf here.
+# Load them via expo-font in app/_layout.tsx for the typography tokens to resolve.
