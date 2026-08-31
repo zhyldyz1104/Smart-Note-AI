@@ -1,4 +1,5 @@
-import { Stack } from 'expo-router';
+//Reviewed
+import { Stack } from 'expo-router'; //Stack = the navigation system that controls how screens appear and how you move between them.
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';

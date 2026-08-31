@@ -2,7 +2,6 @@ const OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY ?? '';
 const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
 const MODEL = 'gpt-4o-mini';
 const SYSTEM_PROMPT = 'You are Smart Note AI assistant.';
-
 export interface Flashcard {
   id: string;
   front: string;
@@ -27,7 +26,6 @@ async function callChatGPT(userPrompt: string, jsonMode = false): Promise<string
   if (!OPENAI_API_KEY) {
     throw new Error('Missing EXPO_PUBLIC_OPENAI_API_KEY. Set it in your .env file.');
   }
-
   const body: Record<string, unknown> = {
     model: MODEL,
     messages: [

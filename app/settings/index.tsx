@@ -1,6 +1,7 @@
+//Reviwed
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Switch } from 'react-native';
-// import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 import { BottomNav } from '../../components/BottomNav';
 import { Colors, Gradients } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
@@ -14,12 +15,12 @@ export default function SettingsScreen() {
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={{ paddingBottom: Layout.bottomNavHeight + Spacing.xxl }} showsVerticalScrollIndicator={false}>
-        {/* <LinearGradient colors={Gradients.hero as [string, string, string]} style={styles.header}> */}
-        <View style={[styles.header, { backgroundColor: Gradients.hero[0] }]}>
+        <LinearGradient colors={Gradients.hero as [string, string, string]} style={styles.header}>
+        {/* <View style={[styles.header, { backgroundColor: Gradients.hero[0] }]}> */}
           <Text style={styles.eyebrow}>SETTINGS</Text>
           <Text style={styles.title}>Personalize</Text>
-        </View>
-        {/* </LinearGradient> */}
+        {/* </View> */}
+        </LinearGradient>
 
         <View style={styles.body}>
           <View style={styles.profile}>

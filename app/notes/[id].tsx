@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from 'react-native';
-// import  LinearGradient  from 'expo-linear-gradient';
+import  {LinearGradient}  from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { AIButtons } from '../../components/AIButtons';
 import { getNotes, type Note } from '../../lib/storage/notes';
@@ -73,8 +73,8 @@ export default function NoteDetailScreen() {
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={{ paddingBottom: Layout.bottomNavHeight + Spacing.xl }} showsVerticalScrollIndicator={false}>
-        {/* <LinearGradient colors={Gradients.hero as [string, string, string]} style={styles.header}> */}
-        <View style={[styles.header, { backgroundColor: Gradients.hero[0] }]}>
+        <LinearGradient colors={Gradients.hero as [string, string, string]} style={styles.header}>
+        {/* <View style={[styles.header, { backgroundColor: Gradients.hero[0] }]}> */}
           <Pressable onPress={() => router.back()} hitSlop={12}>
             <Text style={styles.backBtn}>← Back</Text>
           </Pressable>
@@ -83,8 +83,8 @@ export default function NoteDetailScreen() {
           </View>
           <Text style={styles.title}>{note.title}</Text>
           <Text style={styles.date}>{new Date(note.date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</Text>
-        </View>
-        {/* </LinearGradient> */}
+        {/* </View> */}
+        </LinearGradient>
 
         <View style={styles.body}>
           <Text style={styles.content}>{note.content}</Text>

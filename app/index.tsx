@@ -1,6 +1,7 @@
+//Reviewed
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-// import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Colors, Gradients } from '../constants/colors';
@@ -23,8 +24,8 @@ export default function OnboardingScreen() {
   }, [step]);
 
   return (
-    // <LinearGradient colors={Gradients.hero as [string, string, string]} style={styles.container}>
-    <View style={[styles.container, { backgroundColor: Colors.primary[400] }]}>
+    <LinearGradient colors={Gradients.hero as [string, string, string]} style={styles.container}>
+      {/* <View style={[styles.container, { backgroundColor: Colors.primary[400] }]}> */}
       <Animated.View entering={FadeInDown.duration(600)} style={styles.content}>
         <Text style={styles.emoji}>{steps[step].emoji}</Text>
         <Text style={styles.title}>{steps[step].title}</Text>
@@ -42,15 +43,14 @@ export default function OnboardingScreen() {
           <Text style={styles.skipText}>Skip</Text>
         </Pressable>
         <Pressable onPress={() => router.replace('/notes')}>
-          {/* <LinearGradient colors={Gradients.button as [string, string]} style={styles.button}> */}
-          <View style={[styles.button, { backgroundColor: Gradients.button[0] }]}>
+          <LinearGradient colors={Gradients.button as [string, string]} style={styles.button}>
+            {/* <View style={[styles.button, { backgroundColor: Gradients.button[0] }]}> */}
             <Text style={styles.buttonText}>Get Started</Text>
-          </View>
-          {/* </LinearGradient> */}
+            {/* </View> */}
+          </LinearGradient>
         </Pressable>
       </View>
-      {/* </LinearGradient> */}
-    </View>
+    </LinearGradient>
   );
 }
 
