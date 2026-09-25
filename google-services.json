@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "478554995274",
+    "project_id": "smart-note-ai-ec294",
+    "storage_bucket": "smart-note-ai-ec294.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:478554995274:android:ac1573bee19143a87844b3",
+        "android_client_info": {
+          "package_name": "expo.android.package"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqXydizyD1jfsMqs4YmR97GeaQn_5xeQU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

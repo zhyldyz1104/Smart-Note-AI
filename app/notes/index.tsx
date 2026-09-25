@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, TextInput } from 'react-native';
-import {LinearGradient}  from 'expo-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Header } from '../../components/Header';
@@ -14,6 +14,7 @@ import { Typography } from '../../constants/typography';
 import { Spacing, Radius, Layout } from '../../constants/spacing';
 
 type Filter = 'all' | 'favorites' | 'trash';
+
 
 export default function NotesHomeScreen() {
   const router = useRouter();
@@ -66,9 +67,9 @@ export default function NotesHomeScreen() {
             <Pressable key={f} onPress={() => setFilter(f)} style={styles.tabWrap}>
               {filter === f ? (
                 <LinearGradient colors={Gradients.button as [string, string]} style={styles.tabActive}>
-                {/* <View style={[styles.tabActive, { backgroundColor: Gradients.button[0] }]}> */}
+                  {/* <View style={[styles.tabActive, { backgroundColor: Gradients.button[0] }]}> */}
                   <Text style={styles.tabTextActive}>{f}</Text>
-                {/* </View> */}
+                  {/* </View> */}
                 </LinearGradient>
               ) : (
                 <View style={styles.tab}>
@@ -103,10 +104,10 @@ export default function NotesHomeScreen() {
 
       <Pressable style={styles.fab} onPress={() => setModalVisible(true)}>
         <LinearGradient colors={Gradients.button as [string, string]} style={styles.fabGradient}>
-        {/* <View style={[styles.fabGradient, { backgroundColor: Gradients.button[0] }]}> */}
+          {/* <View style={[styles.fabGradient, { backgroundColor: Gradients.button[0] }]}> */}
           <Text style={styles.fabText}>+</Text>
-        {/* </View> */}
-        </LinearGradient> 
+          {/* </View> */}
+        </LinearGradient>
       </Pressable>
 
       <NewNoteModal

@@ -4,12 +4,13 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "smart-note-ai.firebaseapp.com",
-  projectId: "smart-note-ai",
-  storageBucket: "smart-note-ai.appspot.com",
-  messagingSenderId: "XXXXXXXXXXXX",
-  appId: "1:XXXXXXXXXXXX:web:XXXXXXXXXXXX"
+  apiKey: "AIzaSyAlfhnbLhvKlzrTsijSv01DU0oid8LmUPo",
+  authDomain: "smart-note-ai-ec294.firebaseapp.com",
+  projectId: "smart-note-ai-ec294",
+  storageBucket: "smart-note-ai-ec294.firebasestorage.app",
+  messagingSenderId: "478554995274",
+  appId: "1:478554995274:web:68ba457d2b3394747844b3",
+  measurementId: "G-X8KEB0S5KY"
 };
 
 const app = initializeApp(firebaseConfig);
