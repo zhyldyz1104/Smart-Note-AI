@@ -42,7 +42,8 @@ export default function OnboardingScreen() {
         <Pressable style={styles.skip} onPress={() => router.replace('/notes')}>
           <Text style={styles.skipText}>Skip</Text>
         </Pressable>
-        <Pressable onPress={() => router.replace('/notes')}>
+        <Pressable onPress={() => router.replace('/register')}> 
+          {/* //original is /notes, to let user to register, change to /register */}
           <LinearGradient colors={Gradients.button as [string, string]} style={styles.button}>
             {/* <View style={[styles.button, { backgroundColor: Gradients.button[0] }]}> */}
             <Text style={styles.buttonText}>Get Started</Text>

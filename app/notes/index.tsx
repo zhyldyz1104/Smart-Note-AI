@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, TextInput } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Header } from '../../components/Header';
 import { NoteCard } from '../../components/NoteCard';
@@ -12,22 +12,80 @@ import { useNotes } from '../../hooks/useNotes';
 import { Colors, Gradients } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Spacing, Radius, Layout } from '../../constants/spacing';
+import { db } from '../../firebase/firebase';
+import { collection, addDoc, updateDoc, query, where, getDocs } from 'firebase/firestore';
 
 type Filter = 'all' | 'favorites' | 'trash';
-
+type Note = {
+  id: string;
+  title: string;
+  category: string;
+  content: string;
+  preview: string;
+  date: string;
+  createdAt: string;
+  updatedAt: string;
+  starred: boolean;
+  trashed: boolean;
+};
 
 export default function NotesHomeScreen() {
   const router = useRouter();
-  const { notes, stats, loading, createNote, toggleStar, trash } = useNotes();
+  const params = useLocalSearchParams();
+  const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId;
+
+  const { notes, stats, loading, createNote, toggleStar, trash } = useNotes(userId);
   const [filter, setFilter] = useState<Filter>('all');
   const [query, setQuery] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  /////
+
+
+  // useEffect(() => {
+  //   const fetchNotes = async () => {
+  //     if (!userId) {
+  //       setNotess([]);
+  //       return;
+  //     }
+
+  //     try {
+  //       const notesRef = collection(db, "users", userId, "notes");
+  //       const snapshot = await getDocs(notesRef);
+
+  //       const notesArray: Note[] = snapshot.docs.map(doc => {
+  //         const data = doc.data() as any;
+  //         const now = new Date().toISOString();
+
+  //         return {
+  //           id: doc.id,
+  //           title: data.title || "",
+  //           category: data.category || "general",
+  //           content: data.content || "",
+  //           preview: data.preview || "",
+  //           date: data.date || now,
+  //           createdAt: data.createdAt || now,
+  //           updatedAt: data.updatedAt || now,
+  //           starred: data.starred ?? false,
+  //           trashed: data.trashed ?? false,
+  //         };
+  //       });
+
+  //       setNotess(notesArray);
+  //     } catch (error) {
+  //       console.error("Error loading notes:", error);
+  //       setNotess([]);
+  //     }
+  //   };
+
+  //   fetchNotes();
+  // }, [userId]);
+
 
   const filtered = useMemo(() => {
-    let list = notes;
+    let list = notes; //Give here note from firebase based on id from params
     if (filter === 'favorites') list = list.filter((n) => n.starred && !n.trashed);
     else if (filter === 'trash') list = list.filter((n) => n.trashed);
     else list = list.filter((n) => !n.trashed);
@@ -40,11 +98,10 @@ export default function NotesHomeScreen() {
     }
     return list;
   }, [notes, filter, query]);
-
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={{ paddingBottom: Layout.bottomNavHeight + Spacing.xxl }} showsVerticalScrollIndicator={false}>
-        <Header greeting={greeting} name="Alex Johnson" subtitle="Let's organize your thoughts ✨" />
+        <Header greeting={greeting} subtitle="Let's organize your thoughts ✨" />
 
         <View style={styles.searchWrap}>
           <TextInput
@@ -67,9 +124,7 @@ export default function NotesHomeScreen() {
             <Pressable key={f} onPress={() => setFilter(f)} style={styles.tabWrap}>
               {filter === f ? (
                 <LinearGradient colors={Gradients.button as [string, string]} style={styles.tabActive}>
-                  {/* <View style={[styles.tabActive, { backgroundColor: Gradients.button[0] }]}> */}
                   <Text style={styles.tabTextActive}>{f}</Text>
-                  {/* </View> */}
                 </LinearGradient>
               ) : (
                 <View style={styles.tab}>
@@ -81,24 +136,26 @@ export default function NotesHomeScreen() {
         </View>
 
         <View style={styles.list}>
-          {loading ? (
-            <NotesListSkeleton />
-          ) : filtered.length === 0 ? (
-            <View style={styles.empty}>
-              <Text style={styles.emptyEmoji}>📭</Text>
-              <Text style={styles.emptyText}>No notes here yet</Text>
-            </View>
-          ) : (
-            filtered.map((note, i) => (
-              <NoteCard
-                key={note.id}
-                note={note}
-                index={i}
-                onPress={(n) => router.push(`/notes/${n.id}`)}
-                onStar={(id) => (filter === 'trash' ? trash(id) : toggleStar(id))}
-              />
-            ))
-          )}
+          {
+            loading ? (
+              <NotesListSkeleton />
+            ) : filtered.length === 0 ? (
+              <View style={styles.empty}>
+                <Text style={styles.emptyEmoji}>📭</Text>
+                <Text style={styles.emptyText}>No notes here yet</Text>
+              </View>
+            ) :
+              (
+                filtered.map((note, i) => (
+                  <NoteCard
+                    key={note.id}
+                    note={note}
+                    index={i}
+                    onPress={(n) => router.push(`/notes/${n.id}?userId=${userId}`)}
+                    onStar={(id) => (filter === 'trash' ? trash(id) : toggleStar(id))}
+                  />
+                ))
+              )}
         </View>
       </ScrollView>
 
@@ -114,11 +171,20 @@ export default function NotesHomeScreen() {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         onCreate={async (data) => {
-          const note = await createNote(data);
+          const newNote = await createNote({
+            title: data.title,
+            category: data.category,
+            content: data.content,
+            preview: data.content?.slice(0, 120) ?? "",
+          });
+
           setModalVisible(false);
-          router.push(`/notes/${note.id}`);
+
+          router.push(`/notes/${newNote?.id}?userId=${userId}`);
+          console.log("New note created with ID:", newNote);
         }}
       />
+
 
       <BottomNav />
     </View>

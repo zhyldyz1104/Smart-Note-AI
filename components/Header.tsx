@@ -7,15 +7,14 @@ import { Spacing, Radius } from '../constants/spacing';
 
 interface HeaderProps {
   greeting: string;
-  name: string;
   subtitle?: string;
 }
 
-export function Header({ greeting, name, subtitle }: HeaderProps) {
+export function Header({ greeting, subtitle }: HeaderProps) {
   return (
     <LinearGradient colors={Gradients.hero as [string, string, string]} style={styles.container}>
       <Text style={styles.greeting}>{greeting}</Text>
-      <Text style={styles.name}>{name}</Text>
+
       {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
     </LinearGradient>
   );
