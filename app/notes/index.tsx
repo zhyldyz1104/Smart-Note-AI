@@ -12,28 +12,15 @@ import { useNotes } from '../../hooks/useNotes';
 import { Colors, Gradients } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Spacing, Radius, Layout } from '../../constants/spacing';
-import { db } from '../../firebase/firebase';
-import { collection, addDoc, updateDoc, query, where, getDocs } from 'firebase/firestore';
+
 
 type Filter = 'all' | 'favorites' | 'trash';
-type Note = {
-  id: string;
-  title: string;
-  category: string;
-  content: string;
-  preview: string;
-  date: string;
-  createdAt: string;
-  updatedAt: string;
-  starred: boolean;
-  trashed: boolean;
-};
+
 
 export default function NotesHomeScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId;
-
   const { notes, stats, loading, createNote, toggleStar, trash } = useNotes(userId);
   const [filter, setFilter] = useState<Filter>('all');
   const [query, setQuery] = useState('');
@@ -41,47 +28,7 @@ export default function NotesHomeScreen() {
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-  /////
 
-
-  // useEffect(() => {
-  //   const fetchNotes = async () => {
-  //     if (!userId) {
-  //       setNotess([]);
-  //       return;
-  //     }
-
-  //     try {
-  //       const notesRef = collection(db, "users", userId, "notes");
-  //       const snapshot = await getDocs(notesRef);
-
-  //       const notesArray: Note[] = snapshot.docs.map(doc => {
-  //         const data = doc.data() as any;
-  //         const now = new Date().toISOString();
-
-  //         return {
-  //           id: doc.id,
-  //           title: data.title || "",
-  //           category: data.category || "general",
-  //           content: data.content || "",
-  //           preview: data.preview || "",
-  //           date: data.date || now,
-  //           createdAt: data.createdAt || now,
-  //           updatedAt: data.updatedAt || now,
-  //           starred: data.starred ?? false,
-  //           trashed: data.trashed ?? false,
-  //         };
-  //       });
-
-  //       setNotess(notesArray);
-  //     } catch (error) {
-  //       console.error("Error loading notes:", error);
-  //       setNotess([]);
-  //     }
-  //   };
-
-  //   fetchNotes();
-  // }, [userId]);
 
 
   const filtered = useMemo(() => {

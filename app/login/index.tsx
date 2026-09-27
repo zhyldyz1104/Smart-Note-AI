@@ -27,7 +27,8 @@ export default function LoginScreen() {
             }
 
             // Step 2 — Login successful (no password check yet)
-            router.replace("/notes");
+            const docRef = querySnapshot.docs[0].ref;
+            router.replace(`/notes?userId=${docRef.id}`);
 
         } catch (error) {
             console.error("Login error:", error);

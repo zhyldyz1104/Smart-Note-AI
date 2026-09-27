@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { usePathname, useRouter } from 'expo-router';
+import { useLocalSearchParams, usePathname, useRouter } from 'expo-router';
 import { Colors, Gradients } from '../constants/colors';
 import { Typography } from '../constants/typography';
 import { Spacing, Radius, Layout } from '../constants/spacing';
+
+
 
 interface NavItem {
   key: string;
@@ -22,7 +24,8 @@ const ITEMS: NavItem[] = [
 export function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
-
+  const params = useLocalSearchParams();
+  const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId;
   return (
     <View style={styles.wrapper}>
       <LinearGradient colors={Gradients.card as [string, string]} style={styles.container}>
@@ -32,7 +35,9 @@ export function BottomNav() {
             <Pressable
               key={item.key}
               style={styles.item}
-              onPress={() => router.push(item.href)}
+              onPress={() => {
+                router.push(`${item.href}?userId=${userId}`)
+              }}
             >
               {active ? (
                 <LinearGradient colors={Gradients.button as [string, string]} style={styles.activeIcon}>
