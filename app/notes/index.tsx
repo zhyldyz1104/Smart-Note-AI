@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, TextInput } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import Animated, { FadeIn } from 'react-native-reanimated';
 import { Header } from '../../components/Header';
 import { NoteCard } from '../../components/NoteCard';
 import { BottomNav } from '../../components/BottomNav';
@@ -12,7 +11,7 @@ import { useNotes } from '../../hooks/useNotes';
 import { Colors, Gradients } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Spacing, Radius, Layout } from '../../constants/spacing';
-
+import { useAI } from '../../hooks/useAI';
 
 type Filter = 'all' | 'favorites' | 'trash';
 
@@ -29,7 +28,7 @@ export default function NotesHomeScreen() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
-
+  const { summarize, error, retries, summary } = useAI();
 
   const filtered = useMemo(() => {
     let list = notes; //Give here note from firebase based on id from params
@@ -45,10 +44,16 @@ export default function NotesHomeScreen() {
     }
     return list;
   }, [notes, filter, query]);
+
+
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={{ paddingBottom: Layout.bottomNavHeight + Spacing.xxl }} showsVerticalScrollIndicator={false}>
         <Header greeting={greeting} subtitle="Let's organize your thoughts ✨" />
+        <Pressable onPress={() => summarize("Iadvfd went to schoold this morning and I learned about the solar system. I found it very interesting and I want to learn more about it. Can you summarize what I learned in a few sentences?")}>
+          <Text>Click to test AI</Text>
+          <Text>{summary}</Text>
+        </Pressable>
 
         <View style={styles.searchWrap}>
           <TextInput
@@ -128,7 +133,6 @@ export default function NotesHomeScreen() {
           setModalVisible(false);
 
           router.push(`/notes/${newNote?.id}?userId=${userId}`);
-          console.log("New note created with ID:", newNote);
         }}
       />
 

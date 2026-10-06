@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AIButtons } from '../../components/AIButtons';
-import { getCategoryById } from '../../lib/storage/categories';
 import { useAI } from '../../hooks/useAI';
-import type { Flashcard, QuizQuestion } from '../../lib/ai/chatgpt';
+import type { Flashcard, QuizQuestion } from '../../lib/ai/ai';
+import { getCategoryById } from '../../lib/storage/categories';
 
 import { Colors, Gradients } from '../../constants/colors';
+import { Layout, Radius, Spacing } from '../../constants/spacing';
 import { Typography } from '../../constants/typography';
-import { Spacing, Radius, Layout } from '../../constants/spacing';
 import { db } from '../../firebase/firebase';
 
 type Note = {
@@ -107,23 +107,26 @@ export default function NoteDetailScreen() {
   const readTime = Math.max(1, Math.ceil(words / 200));
 
   const handleSummarize = async () => {
-    const r = await ai.summarize(note.content);
-    if (r) { setResult(r); setResultType('summary'); }
+    const summarized = await ai.summarize(note.content);
+    setResultType('summary');
+    setResult(summarized ?? "");
+    console.log(result)
   };
 
   const handleImprove = async () => {
-    const r = await ai.improve(note.content);
-    if (r) { setResult(r); setResultType('improve'); }
+    const improved = await ai.improve(note.content);
+    setResultType('improve');
+    setResult(improved);
   };
 
   const handleFlashcards = async () => {
-    const r = await ai.flashcards(note.content);
-    if (r) { setResult(r); setResultType('flashcards'); }
+    await ai.flashcards(note.content);
+    setResultType('flashcards');
   };
 
   const handleQuiz = async () => {
-    const r = await ai.quiz(note.content);
-    if (r) { setResult(r); setResultType('quiz'); }
+    await ai.quiz(note.content);
+    setResultType('quiz');
   };
 
   return (
@@ -163,14 +166,6 @@ export default function NoteDetailScreen() {
           </View>
 
           <Text style={styles.sectionTitle}>AI Actions</Text>
-
-          <AIButtons
-            loading={ai.loading}
-            onSummarize={handleSummarize}
-            onImprove={handleImprove}
-            onFlashcards={handleFlashcards}
-            onQuiz={handleQuiz}
-          />
 
           {ai.error ? (
             <View style={styles.errorBox}>
@@ -218,6 +213,13 @@ export default function NoteDetailScreen() {
               ) : null}
             </View>
           ) : null}
+          <AIButtons
+            loading={ai.loading}
+            onSummarize={handleSummarize}
+            onImprove={handleImprove}
+            onFlashcards={handleFlashcards}
+            onQuiz={handleQuiz}
+          />
         </View>
       </ScrollView>
     </View>
