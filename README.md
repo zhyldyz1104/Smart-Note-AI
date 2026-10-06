@@ -1,77 +1,151 @@
-# Smart Note AI — Expo React Native App
+## Smart Notes AI — Expo React Native App
+A cross‑platform (iOS, Android, Web) intelligent note‑taking app with AI‑powered learning tools, built using Expo, React Native, Firebase, and Gemini Flash API.
 
-A cross-platform (iOS, Android, Web) note-taking app with AI features powered by the OpenAI ChatGPT API.
+Smart Notes AI helps users not only store notes, but also understand, summarize, study, and improve them using integrated AI features.
 
-## ✨ Features
+✨ Features
+- 📝 Category‑based notes with search, filters, and real‑time Firestore syncing
 
-- 📝 Notes home with search, counters (Total / Starred / Trashed), and filter tabs
-- ⭐ Favorites and 🗑️ Trash support
+- ⭐ Starred notes and 🗑️ Trash system
+
 - 📄 Note details with AI actions: Summarize, Improve Writing, Flashcards, Quiz
-- 📊 Word/character/read-time stats
-- 🤖 AI Tools screen with progress bars and categories
-- ⚙️ Settings: profile, accessibility, account, preferences, support
-- 🎨 Purple/pink gradient theme with glass-style surfaces
-- 🫧 Reanimated fade-in & slide-up animations
-- 🧭 Expo Router navigation + bottom nav
-- 🛟 Error boundaries + loading skeletons
-- 💾 Local storage via AsyncStorage
 
-## 🚀 Getting Started
+- 📊 Word count, character count, and reading‑time stats
 
-### Prerequisites
+- 🤖 AI Tools screen with progress bars and study utilities
+
+- 📁 Category pages that dynamically load notes based on userId + category
+
+- 🔐 Firebase Authentication (user accounts)
+
+- 🔥 Firestore backend with per‑user note collections
+
+- 🎨 Dark theme with gradients, spacing system, and custom typography
+
+- 🧭 Expo Router navigation + bottom navigation bar
+
+- 🛟 Loading skeletons, error boundaries, and safe AI request handling
+
+- 💾 Local caching for faster navigation
+
+- 📱 Fully reusable components (NoteCard, Header, BottomNav, NewNoteModal)
+
+🚀 Getting Started
+# Prerequisites
 - Node.js 20+
-- Expo SDK 57
-- An OpenAI API key
 
-### Install
-```bash
+- Expo SDK 50+
+
+- Firebase project
+
+- Gemini Flash API key
+
+Install
+```
+bash
 npm install
 ```
+### Configure Firebase
+Create firebase.ts inside /firebase:
 
+ts
+```
+export const db = getFirestore(app);
+export const auth = getAuth(app);
+```
 ### Configure AI
-Create a `.env` file in the project root:
-```
-EXPO_PUBLIC_OPENAI_API_KEY=sk-your-key-here
-```
+Create a .env file:
 
-### Run
-```bash
-# Dev client (iOS/Android)
+Code
+```
+EXPO_PUBLIC_GEMINI_API_KEY=your-key-here
+```
+Run
+bash
+# Dev client (Android/iOS)
+```
 npx expo start --dev-client
+```
 
 # Web
 npx expo start --web
+📁 Project Structure
+Code
 ```
+app/                     # Expo Router screens
+  _layout.tsx            # Root layout (providers, theme, error boundary)
+  index.tsx              # Home / onboarding
+  category/[id].tsx      # Category-based notes
+  notes/index.tsx        # Notes home
+  notes/[id].tsx         # Note details + AI actions
+  ai-tools/index.tsx     # AI tools hub
 
-## 📁 Structure
+components/              # Reusable UI components
+  Header.tsx
+  NoteCard.tsx
+  BottomNav.tsx
+  NewNoteModal.tsx
+  ProgressBars.tsx
+  Skeleton.tsx
+
+hooks/
+  useNotes.ts            # Firestore CRUD + stats
+  useAI.ts               # Summaries, improvements, flashcards, quizzes
+
+constants/
+  colors.ts              # Dark theme + gradients
+  typography.ts          # Inter/Poppins font roles
+  spacing.ts             # Spacing, radius, layout constants
+
+firebase/
+  firebase.ts            # Firebase initialization
+
+lib/
+  storage/categories.ts  # Category definitions
 ```
-app/                 # Expo Router screens
-  _layout.tsx        # Root layout (providers, error boundary)
-  index.tsx          # Onboarding
-  notes/index.tsx    # Notes home
-  notes/[id].tsx     # Note details + AI actions
-  ai-tools/index.tsx # AI tools hub
-  settings/index.tsx # Settings
-components/           # Reusable UI (Header, NoteCard, BottomNav, AIButtons, ProgressBars, ErrorBoundary, Skeleton, NewNoteModal)
-lib/ai/chatgpt.ts     # OpenAI service (summarize, improve, flashcards, quiz)
-lib/storage/         # Notes + categories storage
-constants/           # colors, typography, spacing
-hooks/               # useNotes, useAI
+🎨 Theming
+- constants/colors.ts — dark palette + gradients
+
+- constants/typography.ts — font sizes, weights, roles
+
+- constants/spacing.ts — spacing scale, radius, layout constants
+
+🤖 AI Service
+useAI() exposes:
+- summarize(text) → short summary
+
+- improve(text) → improved writing
+
+- flashcards(text) → list of flashcards
+
+- quiz(text) → generated quiz questions
+
+Powered by Gemini Flash API, wrapped in a safe request handler with:
+
+- Retry logic
+
+- Error handling
+
+- Loading states
+
+- Unified response format
+
+### 🔥 Firestore Structure
+Code
 ```
-
-## 🎨 Theming
-- `constants/colors.ts` — purple/pink palette + gradients
-- `constants/typography.ts` — Poppins/Inter font roles
-- `constants/spacing.ts` — spacing, radius, layout constants
-
-## 🤖 AI Service
-`lib/ai/chatgpt.ts` exposes:
-- `summarizeNote(text)` → string
-- `improveWriting(text)` → string
-- `generateFlashcards(text)` → Flashcard[]
-- `generateQuiz(text)` → QuizQuestion[]
-
-Uses `gpt-4o-mini` by default. Swap to `gpt-4o` in the file for higher quality.
-
-## 📝 License
+users/{userId}
+   name: string
+   email: string
+   notes/
+      {noteId}
+         title: string
+         content: string
+         category: string
+         preview: string
+         starred: boolean
+         trashed: boolean
+         createdAt: timestamp
+         updatedAt: timestamp
+```
+### 📝 License
 MIT
