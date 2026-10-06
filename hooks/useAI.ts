@@ -69,7 +69,7 @@ export function useAI() {
   // ⭐ Summarize uses safeRequest with retry logic
   const summarize = (text: string) => {
     return run(async () => {
-      const result = await safeRequest(`Summarize this:\n${text}`);
+      const result = await safeRequest(`Summarize the following note into a concise summary (3-5 sentences). Return only the summary text:\n${text}`);
       setRetries(result.retries);
       setSummary(result.text);
       return result.text;
@@ -78,7 +78,16 @@ export function useAI() {
 
 
   // ⭐ Other functions remain untouched (no retry logic yet)
-  const improve = (text: string) => run(() => improveWriting(text));
+  const improve = (text: string) => {
+    return run(async () => {
+      const result = await safeRequest(`Improve the writing clarity, grammar, and flow of the following note. Keep the meaning intact. Return only the improved text:\n${text}`);   // your AI call
+
+      setRetries(result.retries);
+      setSummary(result.text);                     // or setImproved(result.text)
+
+      return result.text;                          // return improved text
+    });
+  };
   const flashcards = (text: string) => run(() => generateFlashcards(text));
   const quiz = (text: string) => run(() => generateQuiz(text));
 

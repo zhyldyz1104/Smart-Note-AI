@@ -1,13 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 // import  {LinearGradient}  from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { BottomNav } from '../../components/BottomNav';
 import { ProgressBars } from '../../components/ProgressBars';
 import { Categories } from '../../lib/storage/categories';
 import { Colors, Gradients } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Spacing, Radius, Layout } from '../../constants/spacing';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function AIToolsScreen() {
   const router = useRouter();
@@ -17,16 +18,14 @@ export default function AIToolsScreen() {
     { label: 'Quizzes', value: 0.58 },
     { label: 'Summaries', value: 0.85 },
   ];
-
+  const { userId } = useLocalSearchParams();
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={{ paddingBottom: Layout.bottomNavHeight + Spacing.xxl }} showsVerticalScrollIndicator={false}>
-        {/* <LinearGradient colors={Gradients.hero as [string, string, string]} style={styles.header}> */}
         <View style={[styles.header, { backgroundColor: Gradients.hero[0] }]}>
           <Text style={styles.eyebrow}>AI TOOLS</Text>
           <Text style={styles.title}>Your study companion</Text>
         </View>
-        {/* </LinearGradient> */}
 
         <View style={styles.body}>
           <View style={styles.row}>
@@ -50,10 +49,16 @@ export default function AIToolsScreen() {
           <View style={styles.card}>
             <ProgressBars items={progressItems} />
           </View>
-
           <Text style={styles.sectionTitle}>Categories</Text>
+
           {Categories.map((c) => (
-            <Pressable key={c.id} style={styles.catRow}>
+            <Pressable key={c.id} style={styles.catRow} onPress={() => router.push({
+              pathname: `/category`,
+              params: {
+                userId,
+                category: c.name.toLowerCase()
+              }
+            })}>
               <View style={[styles.catIcon, { backgroundColor: `${c.color}33` }]}>
                 <Text style={styles.catEmoji}>{c.icon}</Text>
               </View>
@@ -65,9 +70,9 @@ export default function AIToolsScreen() {
             </Pressable>
           ))}
         </View>
-      </ScrollView>
+      </ScrollView >
       <BottomNav />
-    </View>
+    </View >
   );
 }
 

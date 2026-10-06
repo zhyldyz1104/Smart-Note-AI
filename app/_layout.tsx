@@ -50,6 +50,8 @@ export default function RootLayout() {
             <Stack.Screen name="ai-tools" />
             <Stack.Screen name="settings" />
             <Stack.Screen name="login" />
+            <Stack.Screen name="category" />
+            {/* <Stack.Screen name="notes/[id]" /> */}
           </Stack>
         </SafeAreaProvider>
       </GestureHandlerRootView>
