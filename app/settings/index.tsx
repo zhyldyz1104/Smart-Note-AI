@@ -1,25 +1,61 @@
 //Reviwed
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Switch } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BottomNav } from '../../components/BottomNav';
 import { Colors, Gradients } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Spacing, Radius, Layout } from '../../constants/spacing';
+import { doc, getDoc } from 'firebase/firestore';
+import { useLocalSearchParams } from 'expo-router';
+import { db } from '../../firebase/firebase';
 
 export default function SettingsScreen() {
   const [highContrast, setHighContrast] = useState(false);
   const [largeText, setLargeText] = useState(false);
   const [notifications, setNotifications] = useState(true);
 
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const { userId } = useLocalSearchParams();
+
+  async function getUserNameById(userId: string) {
+    try {
+      const userRef = doc(db, "users", userId);
+      const snap = await getDoc(userRef);
+
+      if (snap.exists()) {
+        return { name: snap.data().name, email: snap.data().email };
+      }
+      return null;
+    } catch (e) {
+      console.log("Error fetching user name:", e);
+      return null;
+    }
+  }
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const loadName = async () => {
+      const user = await getUserNameById(String(userId));
+      if (user) {
+        setUserName(user.name);
+        setUserEmail(user.email);
+      }
+    };
+
+    loadName();
+  }, [userId]);
+
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={{ paddingBottom: Layout.bottomNavHeight + Spacing.xxl }} showsVerticalScrollIndicator={false}>
         <LinearGradient colors={Gradients.hero as [string, string, string]} style={styles.header}>
-        {/* <View style={[styles.header, { backgroundColor: Gradients.hero[0] }]}> */}
+          {/* <View style={[styles.header, { backgroundColor: Gradients.hero[0] }]}> */}
           <Text style={styles.eyebrow}>SETTINGS</Text>
           <Text style={styles.title}>Personalize</Text>
-        {/* </View> */}
+          {/* </View> */}
         </LinearGradient>
 
         <View style={styles.body}>
@@ -28,8 +64,8 @@ export default function SettingsScreen() {
               <Text style={styles.avatarText}>AJ</Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.name}>Alex Johnson</Text>
-              <Text style={styles.email}>alex.johnson@example.com</Text>
+              <Text style={styles.name}>{userName}</Text>
+              <Text style={styles.email}>{userEmail}</Text>
             </View>
             <Pressable>
               <Text style={styles.edit}>Edit</Text>

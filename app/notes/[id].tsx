@@ -110,13 +110,12 @@ export default function NoteDetailScreen() {
     const summarized = await ai.summarize(note.content);
     setResultType('summary');
     setResult(summarized ?? "");
-    console.log(result)
   };
 
   const handleImprove = async () => {
     const improved = await ai.improve(note.content);
     setResultType('improve');
-    setResult(improved);
+    setResult(improved ?? "");
   };
 
   const handleFlashcards = async () => {
