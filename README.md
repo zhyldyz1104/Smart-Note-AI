@@ -58,7 +58,6 @@ Create a .env file:
 
 Code
 ```
-EXPO_PUBLIC_GEMINI_API_KEY=your-key-here
 ```
 Run
 bash
