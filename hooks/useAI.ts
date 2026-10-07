@@ -1,46 +1,44 @@
-import { GoogleGenAI } from "@google/genai";
 import { useState } from 'react';
+import { getApp } from '@react-native-firebase/app';
+import { getAI, getGenerativeModel } from '@react-native-firebase/ai';
 import {
   generateFlashcards,
-  generateQuiz,
-  improveWriting
+  generateQuiz
 } from '../lib/ai/ai';
 
-// Initialize Gemini client
-const ai = new GoogleGenAI({
-  apiKey: "AQ.Ab8RN6Jt3fjttQf7fuxsuXTZ9SHAC04aJVFQwa0q7vYOonzCLA",
+// Initialize Firebase AI Logic using your existing Firebase App
+const app = getApp();
+const ai = getAI(app);
+
+// Configure the model globally
+// We use gemini-3.8-flash for the fastest possible response time
+const model = getGenerativeModel(ai, {
+  model: 'gemini-3.8-flash',
+  systemInstruction: 'Respond concisely. Use fast reasoning.'
 });
 
-// Universal safe request with retry logic (only used for summarize for now)
-async function safeRequest(prompt: string) {
-  const maxRetries = 2;      // Try up to 2 times
-  const delay = 30000;        // Wait 30 seconds between tries
-  let retries = 0;
+export async function safeRequest(prompt: string, onChunk: (text: string) => void) {
+  try {
+    // generateContentStream gives us "antigravity" speed by streaming chunks 
+    // as soon as the model thinks of them, rather than waiting for the whole response.
+    const result = await model.generateContentStream(prompt);
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const interaction = await ai.interactions.create({
-        model: "gemini-3.5-flash-lite",
-        input: prompt,
-      });
+    let fullText = "";
 
-      console.log("2 safeRequest result:", interaction.output_text);
-      return { text: interaction.output_text, retries };
-    }
-    catch (error: any) {
-      // Rate limit or temporary service overload
-      console.log(error.status)
-      if (error.status == 429 && error.status == 503) {
-        retries++;
-        console.log(`Retry ${retries}/${maxRetries} — waiting ${delay / 1000}s...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      } else {
-        throw error; // Other errors should not retry
+    // Iterate over the stream
+    for await (const chunk of result.stream) {
+      const chunkText = chunk.text();
+      if (chunkText) {
+        fullText += chunkText;
+        onChunk(chunkText); // Send partial text directly to your UI
       }
     }
-  }
 
-  throw new Error("Failed after multiple retries.");
+    return fullText;
+  } catch (error: any) {
+    console.log("Streaming Error:", error.message);
+    throw error;
+  }
 }
 
 export function useAI() {
@@ -49,7 +47,7 @@ export function useAI() {
   const [retries, setRetries] = useState(0);
   const [summary, setSummary] = useState<string | undefined>('');
 
-  const run = async <T>(fn: () => Promise<T>): Promise<T | null> => {
+  const run = async <T,>(fn: () => Promise<T>): Promise<T | null> => {
     setLoading(true);
     setError(null);
     setRetries(0);
@@ -66,28 +64,42 @@ export function useAI() {
     }
   };
 
-  // ⭐ Summarize uses safeRequest with retry logic
+  // ⭐ Summarize uses safeRequest to stream chunks directly into the summary state
   const summarize = (text: string) => {
     return run(async () => {
-      const result = await safeRequest(`Summarize the following note into a concise summary (3-5 sentences). Return only the summary text:\n${text}`);
-      setRetries(result.retries);
-      setSummary(result.text);
-      return result.text;
-    });
-  }
+      setSummary(""); // clear previous summary
+      let fullText = "";
 
+      await safeRequest(
+        `Summarize the following note into a concise summary (3-5 sentences). Return only the summary text:\n${text}`,
+        (chunk) => {
+          fullText += chunk;
+          setSummary(prev => prev + chunk);
+        }
+      );
 
-  // ⭐ Other functions remain untouched (no retry logic yet)
-  const improve = (text: string) => {
-    return run(async () => {
-      const result = await safeRequest(`Improve the writing clarity, grammar, and flow of the following note. Keep the meaning intact. Return only the improved text:\n${text}`);   // your AI call
-
-      setRetries(result.retries);
-      setSummary(result.text);                     // or setImproved(result.text)
-
-      return result.text;                          // return improved text
+      return fullText;
     });
   };
+
+  // ⭐ Improve uses safeRequest to stream chunks directly into the summary state
+  const improve = (text: string) => {
+    return run(async () => {
+      setSummary(""); // clear previous summary
+      let fullText = "";
+
+      await safeRequest(
+        `Improve the writing clarity, grammar, and flow of the following note. Keep the meaning intact. Return only the improved text:\n${text}`,
+        (chunk) => {
+          fullText += chunk;
+          setSummary(prev => prev + chunk);
+        }
+      );
+
+      return fullText;
+    });
+  };
+
   const flashcards = (text: string) => run(() => generateFlashcards(text));
   const quiz = (text: string) => run(() => generateQuiz(text));
 
