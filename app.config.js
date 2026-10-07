@@ -2,27 +2,30 @@ import 'dotenv/config';
 
 export default ({ config }) => ({
   ...config,
-  
+
+  // Correct placement for EAS project ID
+  eas: {
+    projectId: "b3a0f2ef-92fe-446a-ad18-b0516a46bcc8"
+  },
+
   extra: {
     ...config.extra,
-    EXPO_PUBLIC_GEMINI_API_KEY: process.env.EXPO_PUBLIC_GEMINI_API_KEY,
-    // Add this EAS object here:
-    eas: {
-      projectId: "b3a0f2ef-92fe-446a-ad18-b0516a46bcc8"
-    }
+    EXPO_PUBLIC_GEMINI_API_KEY: process.env.EXPO_PUBLIC_GEMINI_API_KEY
   },
-  
+
   scheme: "smartnotes",
-  
+
   android: {
     ...config.android,
-    package: "com.smartnotes.app",
+    package: "com.smartnoteai.app",
     googleServicesFile: "./google-services.json"
   },
-  
+
   plugins: [
-    "@react-native-firebase/app",
-    "@react-native-firebase/app-check",
+    // ❌ Removed invalid Firebase plugin
+    // "@react-native-firebase/app-check",
+
+    // ✔ Valid Expo plugin
     "expo-router"
   ]
 });
