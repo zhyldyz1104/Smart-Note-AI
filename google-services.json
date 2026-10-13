@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:478554995274:android:ac1573bee19143a87844b3",
         "android_client_info": {
-          "package_name": "expo.android.package"
+          "package_name": "com.smartnoteai.app"
         }
       },
       "oauth_client": [],
