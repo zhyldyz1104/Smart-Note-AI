@@ -10,7 +10,7 @@ export default ({ config }) => ({
 
   extra: {
     ...config.extra,
-    EXPO_PUBLIC_GEMINI_API_KEY: process.env.EXPO_PUBLIC_GEMINI_API_KEY
+    geminiApiKey: process.env.EXPO_PUBLIC_GEMINI_API_KEY
   },
 
   scheme: "smartnotes",

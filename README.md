@@ -2,6 +2,10 @@
 A cross‑platform (iOS, Android, Web) intelligent note‑taking app with AI‑powered learning tools, built using Expo, React Native, Firebase, and Gemini Flash API.
 
 Smart Notes AI helps users not only store notes, but also understand, summarize, study, and improve them using integrated AI features.
+⚠️ This project requires Expo Dev Client with custom native modules.
+Run:
+npx expo prebuild
+npx expo run:android
 
 ✨ Features
 - 📝 Category‑based notes with search, filters, and real‑time Firestore syncing

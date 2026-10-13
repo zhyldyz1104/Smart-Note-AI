@@ -28,7 +28,7 @@ export default function NotesHomeScreen() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
-  const { summarize, error, retries, summary } = useAI();
+  const { summarize, error, summary } = useAI();
 
   const filtered = useMemo(() => {
     let list = notes; //Give here note from firebase based on id from params

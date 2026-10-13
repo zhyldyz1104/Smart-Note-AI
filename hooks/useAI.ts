@@ -1,62 +1,89 @@
-import { useState } from 'react';
-import { getApp } from '@react-native-firebase/app';
-import { getAI, getGenerativeModel } from '@react-native-firebase/ai';
-import {
-  generateFlashcards,
-  generateQuiz
-} from '../lib/ai/ai';
+import { useState, useRef } from "react";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import Constants from "expo-constants";
+// Initialize Gemini using Expo-safe environment variable
+const geminiKey =
+  Constants.expoConfig?.extra?.geminiApiKey ??
+  (Constants.manifest as (typeof Constants.manifest & {
+    extra?: { geminiApiKey?: string };
+  }) | null)?.extra?.geminiApiKey;
 
-// Initialize Firebase AI Logic using your existing Firebase App
-const app = getApp();
-const ai = getAI(app);
+if (!geminiKey) {
+  console.log( Constants.expoConfig?.extra?.geminiApiKey)
+  throw new Error("Gemini API key is missing. Check app.config.js and .env.");
+}
 
-// Configure the model globally
-// We use gemini-3.8-flash for the fastest possible response time
-const model = getGenerativeModel(ai, {
-  model: 'gemini-3.8-flash',
-  systemInstruction: 'Respond concisely. Use fast reasoning.'
+const genAI = new GoogleGenerativeAI(geminiKey);
+
+
+// Configure the model
+const model = genAI.getGenerativeModel({
+  model: "gemini-3.5-flash-lite",
+  systemInstruction: "Respond concisely. Use fast reasoning."
 });
 
-export async function safeRequest(prompt: string, onChunk: (text: string) => void) {
-  try {
-    // generateContentStream gives us "antigravity" speed by streaming chunks 
-    // as soon as the model thinks of them, rather than waiting for the whole response.
+// ---------- RETRY WRAPPER ----------
+async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
+  let attempt = 0;
+
+  while (attempt < maxRetries) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      const retryable =
+        err?.status === 429 ||
+        err?.status === 503 ||
+        err?.message?.includes("rate") ||
+        err?.message?.includes("quota");
+
+      if (!retryable) throw err;
+
+      attempt++;
+      await new Promise((res) => setTimeout(res, 1500 * attempt)); // exponential backoff
+    }
+  }
+
+  throw new Error("Max retries reached");
+}
+
+// ---------- STREAMING REQUEST ----------
+export async function safeRequest(
+  prompt: string,
+  onChunk: (text: string) => void
+) {
+  return withRetry(async () => {
     const result = await model.generateContentStream(prompt);
 
     let fullText = "";
 
-    // Iterate over the stream
     for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      if (chunkText) {
-        fullText += chunkText;
-        onChunk(chunkText); // Send partial text directly to your UI
+      const text = chunk.text();
+      if (text) {
+        fullText += text;
+        onChunk(text);
       }
     }
 
     return fullText;
-  } catch (error: any) {
-    console.log("Streaming Error:", error.message);
-    throw error;
-  }
+  });
 }
 
+// ---------- MAIN HOOK ----------
 export function useAI() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [retries, setRetries] = useState(0);
-  const [summary, setSummary] = useState<string | undefined>('');
+  const [summary, setSummary] = useState("");
+  const abortRef = useRef<AbortController | null>(null);
 
   const run = async <T,>(fn: () => Promise<T>): Promise<T | null> => {
     setLoading(true);
     setError(null);
-    setRetries(0);
 
     try {
       const result = await fn();
       return result;
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'AI request failed';
+      const msg = e instanceof Error ? e.message : "AI request failed";
       setError(msg);
       return null;
     } finally {
@@ -64,17 +91,17 @@ export function useAI() {
     }
   };
 
-  // ⭐ Summarize uses safeRequest to stream chunks directly into the summary state
+  // ---------- SUMMARIZE ----------
   const summarize = (text: string) => {
     return run(async () => {
-      setSummary(""); // clear previous summary
+      setSummary("");
       let fullText = "";
 
       await safeRequest(
-        `Summarize the following note into a concise summary (3-5 sentences). Return only the summary text:\n${text}`,
+        `Summarize the following note into a concise summary (3–5 sentences). Return only the summary text:\n${text}`,
         (chunk) => {
           fullText += chunk;
-          setSummary(prev => prev + chunk);
+          setSummary((prev) => prev + chunk);
         }
       );
 
@@ -82,17 +109,17 @@ export function useAI() {
     });
   };
 
-  // ⭐ Improve uses safeRequest to stream chunks directly into the summary state
+  // ---------- IMPROVE ----------
   const improve = (text: string) => {
     return run(async () => {
-      setSummary(""); // clear previous summary
+      setSummary("");
       let fullText = "";
 
       await safeRequest(
         `Improve the writing clarity, grammar, and flow of the following note. Keep the meaning intact. Return only the improved text:\n${text}`,
         (chunk) => {
           fullText += chunk;
-          setSummary(prev => prev + chunk);
+          setSummary((prev) => prev + chunk);
         }
       );
 
@@ -100,8 +127,11 @@ export function useAI() {
     });
   };
 
-  const flashcards = (text: string) => run(() => generateFlashcards(text));
-  const quiz = (text: string) => run(() => generateQuiz(text));
-
-  return { loading, error, retries, summary, summarize, improve, flashcards, quiz };
+  return {
+    loading,
+    error,
+    summary,
+    summarize,
+    improve,
+  };
 }
