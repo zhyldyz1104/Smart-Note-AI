@@ -5,7 +5,7 @@ export default ({ config }) => ({
 
   // Correct placement for EAS project ID
   eas: {
-    projectId: "b3a0f2ef-92fe-446a-ad18-b0516a46bcc8"
+    projectId: "5110dfae-dd2a-4fe3-b490-d84fa94d2fcb"
   },
 
   extra: {
